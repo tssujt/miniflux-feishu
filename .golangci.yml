@@ -1,0 +1,50 @@
+run:
+  timeout: 5m
+  go: '1.24'
+
+linters:
+  enable:
+    - gofmt
+    - goimports
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    - ineffassign
+    - typecheck
+    - exportloopref
+    - gocritic
+    - gocyclo
+    - gosec
+    - misspell
+    - unconvert
+    - unparam
+    - nolintlint
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+  gosec:
+    excludes:
+      - G204 # Subprocess launched with variable
+  misspell:
+    locale: US
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gosec
+        - errcheck
+    - path: wire_gen\.go
+      linters:
+        - unused
+        - deadcode
