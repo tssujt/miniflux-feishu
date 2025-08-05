@@ -53,6 +53,8 @@ PORT=8000  # 服务端口，默认 8000
 
 ## 飞书消息格式
 
+参考文档 [webhook 触发器](https://www.feishu.cn/hc/zh-CN/articles/807992406756-webhook-%E8%A7%A6%E5%8F%91%E5%99%A8)
+
 每个新文章将以飞书标准的文本消息格式发送到 webhook：
 
 ### 消息结构示例
