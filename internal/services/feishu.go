@@ -17,23 +17,9 @@ type FeishuService struct {
 }
 
 type FeishuMessage struct {
-	MsgType string      `json:"msg_type"`
-	Content interface{} `json:"content"`
-}
-
-type FeishuRichTextContent struct {
-	RichText *FeishuRichText `json:"rich_text"`
-}
-
-type FeishuRichText struct {
-	Elements [][]FeishuElement `json:"elements"`
-}
-
-type FeishuElement struct {
-	Tag   string   `json:"tag"`
-	Text  string   `json:"text,omitempty"`
-	Href  string   `json:"href,omitempty"`
-	Style []string `json:"style,omitempty"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
+	Link    string `json:"link"`
 }
 
 func NewFeishuService() *FeishuService {
@@ -50,56 +36,20 @@ func (s *FeishuService) SendEntryToFeishu(entry *models.WebhookEntry, feed *mode
 }
 
 func (s *FeishuService) formatEntryMessage(entry *models.WebhookEntry, feed *models.WebhookFeed) FeishuMessage {
-	elements := [][]FeishuElement{
-		{
-			{Tag: "text", Text: fmt.Sprintf("📰 %s", feed.Title), Style: []string{"bold"}},
-		},
-		{
-			{Tag: "text", Text: ""},
-		},
-		{
-			{Tag: "a", Text: entry.Title, Href: entry.URL},
-		},
-	}
-
+	content := ""
 	if entry.Content != "" {
-		content := s.stripHTML(entry.Content)
-		if len(content) > 200 {
-			content = content[:200] + "..."
+		content = s.stripHTML(entry.Content)
+		if len(content) > 300 {
+			content = content[:300] + "..."
 		}
-		elements = append(elements, []FeishuElement{
-			{Tag: "text", Text: ""},
-		})
-		elements = append(elements, []FeishuElement{
-			{Tag: "text", Text: content},
-		})
 	}
 
-	if len(entry.Tags) > 0 {
-		tagText := "🏷️ " + strings.Join(entry.Tags, ", ")
-		elements = append(elements, []FeishuElement{
-			{Tag: "text", Text: ""},
-		})
-		elements = append(elements, []FeishuElement{
-			{Tag: "text", Text: tagText, Style: []string{"italic"}},
-		})
-	}
-
-	publishedTime := entry.Date.Format("2006-01-02 15:04")
-	elements = append(elements, []FeishuElement{
-		{Tag: "text", Text: ""},
-	})
-	elements = append(elements, []FeishuElement{
-		{Tag: "text", Text: fmt.Sprintf("🕐 %s", publishedTime), Style: []string{"italic"}},
-	})
+	title := fmt.Sprintf("[%s] - %s", feed.Title, entry.Title)
 
 	return FeishuMessage{
-		MsgType: "rich_text",
-		Content: FeishuRichTextContent{
-			RichText: &FeishuRichText{
-				Elements: elements,
-			},
-		},
+		Title:   title,
+		Content: content,
+		Link:    entry.URL,
 	}
 }
 

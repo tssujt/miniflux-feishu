@@ -5,16 +5,20 @@ import (
 	"net/http"
 
 	"miniflux-feishu/internal/models"
-	"miniflux-feishu/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-type WebhookHandler struct {
-	feishuService *services.FeishuService
+// FeishuServiceInterface defines the interface for Feishu service
+type FeishuServiceInterface interface {
+	SendEntryToFeishu(entry *models.WebhookEntry, feed *models.WebhookFeed, webhookURL string) error
 }
 
-func NewWebhookHandler(feishuService *services.FeishuService) *WebhookHandler {
+type WebhookHandler struct {
+	feishuService FeishuServiceInterface
+}
+
+func NewWebhookHandler(feishuService FeishuServiceInterface) *WebhookHandler {
 	return &WebhookHandler{
 		feishuService: feishuService,
 	}

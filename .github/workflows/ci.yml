@@ -7,6 +7,53 @@ on:
     branches: [main]
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Run tests
+        run: go test -v -race -coverprofile=coverage.out ./...
+
+      - name: Generate coverage report
+        run: go tool cover -html=coverage.out -o coverage.html
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.html
+
+      - name: Check coverage
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+          echo "Total coverage: ${COVERAGE}%"
+          COVERAGE_INT=$(echo "$COVERAGE" | cut -d. -f1)
+          if [ "$COVERAGE_INT" -lt 60 ]; then
+            echo "Coverage is below 60%"
+            exit 1
+          fi
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -15,7 +62,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
+          go-version: 1.24
 
       - uses: pre-commit/action@v3.0.1
 
@@ -27,7 +74,7 @@ jobs:
 
   build:
     if: github.event_name != 'pull_request'
-    needs: lint
+    needs: [test, lint]
     runs-on: ubuntu-latest
 
     steps:
