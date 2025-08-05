@@ -53,15 +53,18 @@ PORT=8000  # 服务端口，默认 8000
 
 ## 飞书消息格式
 
-每个新文章将以简洁的 JSON 格式发送到飞书 webhook，包含以下三个字段：
+每个新文章将以飞书标准的文本消息格式发送到 webhook：
 
 ### 消息结构示例
 
 ```json
 {
-  "title": "[RSS源标题] - 文章标题",
-  "content": "文章内容摘要（去除HTML标签，限制300字符）",
-  "link": "https://example.com/article-url"
+  "msg_type": "text",
+  "content": {
+    "title": "[RSS 源标题] - 文章标题",
+    "content": "文章内容摘要（去除 HTML 标签，限制 300 字符）",
+    "url": "https://example.com/article-url"
+  }
 }
 ```
 
@@ -69,17 +72,22 @@ PORT=8000  # 服务端口，默认 8000
 
 ```json
 {
-  "title": "[技术博客] - Go语言并发编程最佳实践",
-  "content": "在Go语言中，goroutine和channel是实现并发的核心机制。本文将详细介绍如何正确使用这些特性来构建高效的并发程序...",
-  "link": "https://blog.example.com/go-concurrency-best-practices"
+  "msg_type": "text",
+  "content": {
+    "title": "[技术博客] - Go 语言并发编程最佳实践",
+    "content": "在 Go 语言中，goroutine 和 channel 是实现并发的核心机制。本文将详细介绍如何正确使用这些特性来构建高效的并发程序...",
+    "url": "https://blog.example.com/go-concurrency-best-practices"
+  }
 }
 ```
 
 ### 字段说明
 
-- **title**: 包含RSS源标题前缀的完整标题，格式为 `[RSS源标题] - 文章标题`
-- **content**: 文章内容摘要，自动去除HTML标签，超过300字符会被截断并添加省略号
-- **link**: 文章的原始链接URL
+- **msg_type**: 消息类型，固定为 `"text"`
+- **content**: 消息内容对象，包含：
+  - **title**: 包含 RSS 源标题前缀的完整标题，格式为 `[RSS源标题] - 文章标题`
+  - **content**: 文章内容摘要，自动去除 HTML 标签，超过 300 字符会被截断并添加省略号
+  - **url**: 文章的原始链接 URL
 
 ## License
 

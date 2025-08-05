@@ -17,9 +17,14 @@ type FeishuService struct {
 }
 
 type FeishuMessage struct {
+	MsgType string             `json:"msg_type"`
+	Content FeishuTextContent  `json:"content"`
+}
+
+type FeishuTextContent struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
-	Link    string `json:"link"`
+	URL     string `json:"url"`
 }
 
 func NewFeishuService() *FeishuService {
@@ -47,9 +52,12 @@ func (s *FeishuService) formatEntryMessage(entry *models.WebhookEntry, feed *mod
 	title := fmt.Sprintf("[%s] - %s", feed.Title, entry.Title)
 
 	return FeishuMessage{
-		Title:   title,
-		Content: content,
-		Link:    entry.URL,
+		MsgType: "text",
+		Content: FeishuTextContent{
+			Title:   title,
+			Content: content,
+			URL:     entry.URL,
+		},
 	}
 }
 

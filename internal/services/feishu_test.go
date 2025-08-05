@@ -57,24 +57,31 @@ func TestFeishuService_FormatEntryMessage(t *testing.T) {
 
 	message := service.formatEntryMessage(entry, feed)
 
-	// Expected simple message structure
+	// Expected message structure
 	expectedMessage := FeishuMessage{
-		Title:   "[Example website] - Example",
-		Content: "Some HTML content",
-		Link:    "https://example.org/article",
+		MsgType: "text",
+		Content: FeishuTextContent{
+			Title:   "[Example website] - Example",
+			Content: "Some HTML content",
+			URL:     "https://example.org/article",
+		},
 	}
 
 	// Compare the actual result with expected
-	if message.Title != expectedMessage.Title {
-		t.Errorf("Expected Title %s, got %s", expectedMessage.Title, message.Title)
+	if message.MsgType != expectedMessage.MsgType {
+		t.Errorf("Expected MsgType %s, got %s", expectedMessage.MsgType, message.MsgType)
 	}
 
-	if message.Content != expectedMessage.Content {
-		t.Errorf("Expected Content %s, got %s", expectedMessage.Content, message.Content)
+	if message.Content.Title != expectedMessage.Content.Title {
+		t.Errorf("Expected Title %s, got %s", expectedMessage.Content.Title, message.Content.Title)
 	}
 
-	if message.Link != expectedMessage.Link {
-		t.Errorf("Expected Link %s, got %s", expectedMessage.Link, message.Link)
+	if message.Content.Content != expectedMessage.Content.Content {
+		t.Errorf("Expected Content %s, got %s", expectedMessage.Content.Content, message.Content.Content)
+	}
+
+	if message.Content.URL != expectedMessage.Content.URL {
+		t.Errorf("Expected URL %s, got %s", expectedMessage.Content.URL, message.Content.URL)
 	}
 
 	// Print the actual JSON that would be sent to Feishu
@@ -172,17 +179,21 @@ func TestFeishuService_SendEntryToFeishu_Integration(t *testing.T) {
 		t.Fatalf("Failed to unmarshal captured body: %v", err)
 	}
 
-	// Verify the simple message structure
-	if capturedMessage.Title != "[Example website] - Example" {
-		t.Errorf("Expected Title '[Example website] - Example', got %s", capturedMessage.Title)
+	// Verify the message structure
+	if capturedMessage.MsgType != "text" {
+		t.Errorf("Expected MsgType text, got %s", capturedMessage.MsgType)
 	}
 
-	if capturedMessage.Content != "Some HTML content" {
-		t.Errorf("Expected Content 'Some HTML content', got %s", capturedMessage.Content)
+	if capturedMessage.Content.Title != "[Example website] - Example" {
+		t.Errorf("Expected Title '[Example website] - Example', got %s", capturedMessage.Content.Title)
 	}
 
-	if capturedMessage.Link != "https://example.org/article" {
-		t.Errorf("Expected Link https://example.org/article, got %s", capturedMessage.Link)
+	if capturedMessage.Content.Content != "Some HTML content" {
+		t.Errorf("Expected Content 'Some HTML content', got %s", capturedMessage.Content.Content)
+	}
+
+	if capturedMessage.Content.URL != "https://example.org/article" {
+		t.Errorf("Expected URL https://example.org/article, got %s", capturedMessage.Content.URL)
 	}
 
 	// Print the actual webhook body that was sent
